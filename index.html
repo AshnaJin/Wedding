@@ -1,68 +1,97 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR.js Image Tracking</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
+      body { margin: 0; }
+      canvas { display: block; }
     </style>
   </head>
   <body>
-    <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
-      <a-assets>
-        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/OG.glb"></a-asset-item>
-      </a-assets>
+    <a-scene embedded arjs='trackingMethod: best; sourceType: webcam;'>
+      <!-- Replace 'your-image-target.png' with the path to your custom image -->
+      <a-image 
+        id="imageTarget" 
+        src="qrcode_with_logo.png" 
+        position="0 0 0" 
+        rotation="-90 0 0" 
+        scale="1 1 1" 
+        visible="false">
+      </a-image>
 
-      <a-camera id="camera" position="0 1.6 0" wasd-controls="enabled: false"></a-camera>
-      
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model
-          id="model"
-          src="#avatarModel"
-          position="0 0 0"
-          scale="0.5 0.5 0.5"
-          gesture-handler
-        ></a-gltf-model>
-      </a-entity>
+      <a-marker type="pattern" url="pattern.patt">
+        <a-gltf-model 
+          id="model" 
+          src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/OG.glb" 
+          scale="0.5 0.5 0.5" 
+          animation-mixer>
+        </a-gltf-model>
+      </a-marker>
 
-      <script>
-        AFRAME.registerComponent('gesture-handler', {
-          init: function () {
-            const model = this.el;
-            const camera = document.getElementById('camera');
-
-            // Variables to track scale and rotation
-            let scale = 0.5; // Initial scale factor
-
-            // Listen for pinch events to zoom in and out
-            this.el.sceneEl.addEventListener('pinch', (event) => {
-              const pinchScale = event.detail.scale;
-              scale *= pinchScale; // Update scale based on pinch scale
-              model.setAttribute('scale', `${scale} ${scale} ${scale}`);
-            });
-
-            // Listen for drag events to rotate and move the model
-            this.el.sceneEl.addEventListener('drag', (event) => {
-              const movementX = event.detail.movementX * 0.5; // Adjust sensitivity
-              const movementY = event.detail.movementY * 0.5; // Adjust sensitivity
-
-              // Rotate the model based on horizontal drag
-              const rotation = model.getAttribute('rotation');
-              model.setAttribute('rotation', {
-                x: rotation.x - movementY, // Rotate model up and down
-                y: rotation.y + movementX, // Rotate model left and right
-                z: rotation.z
-              });
-
-              // Optionally move the camera based on drag (uncomment if desired)
-              // camera.object3D.position.y -= movementY; // Move camera up and down
-            });
-          }
-        });
-      </script>
+      <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+      const model = document.getElementById('model');
+      const imageTarget = document.getElementById('imageTarget');
+
+      // Rotate the model on mouse/touch drag
+      let isDragging = false;
+      let startX, startY;
+
+      // Event listeners for mouse and touch
+      window.addEventListener('mousedown', (event) => {
+        startX = event.clientX;
+        startY = event.clientY;
+        isDragging = true;
+      });
+
+      window.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+          const deltaX = event.clientX - startX;
+          const deltaY = event.clientY - startY;
+
+          // Rotate the model based on mouse movement
+          model.object3D.rotation.y += deltaX * 0.01; // Rotate left/right
+          model.object3D.rotation.x -= deltaY * 0.01; // Rotate up/down
+
+          startX = event.clientX;
+          startY = event.clientY;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      // Touch support for mobile
+      window.addEventListener('touchstart', (event) => {
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+        isDragging = true;
+      });
+
+      window.addEventListener('touchmove', (event) => {
+        if (isDragging) {
+          const deltaX = event.touches[0].clientX - startX;
+          const deltaY = event.touches[0].clientY - startY;
+
+          // Rotate the model based on touch movement
+          model.object3D.rotation.y += deltaX * 0.01; // Rotate left/right
+          model.object3D.rotation.x -= deltaY * 0.01; // Rotate up/down
+
+          startX = event.touches[0].clientX;
+          startY = event.touches[0].clientY;
+        }
+      });
+
+      window.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+    </script>
   </body>
 </html>
