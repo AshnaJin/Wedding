@@ -16,23 +16,24 @@
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0 0" scale="7 7 7"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.07 0" scale="7 7 7"></a-gltf-model>
       </a-entity>
     </a-scene>
 
     <script>
       const model = document.getElementById('model');
 
-      // Variables to track gesture states
+      // Variables to track gesture states and smoothness
       let isDragging = false;
       let previousX = 0;
       let previousY = 0;
+      let initialDistance = 0;
 
-      // Current rotation angles
-      let rotationY = 0;  // Y-axis rotation
-      let rotationX = 0;  // X-axis rotation
-
-      const MAX_ROTATION = Math.PI / 2; // 90 degrees in radians
+      let rotationY = 0; // Y-axis (left-right) rotation
+      let rotationX = 0; // X-axis (up-down) rotation
+      const smoothFactor = 0.05; // Smoothing factor
+      const maxRotationX = Math.PI / 4; // Limit for up/down rotation (45 degrees)
+      const maxRotationY = Math.PI / 4; // Limit for left-right rotation (90 degrees, half of 180)
 
       // Start interaction
       const startInteraction = (event) => {
@@ -41,37 +42,60 @@
           previousX = event.touches[0].clientX;
           previousY = event.touches[0].clientY;
           isDragging = true;
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          event.preventDefault();
+          initialDistance = getDistance(event.touches[0], event.touches[1]);
         }
       };
 
-      // Handle movement (rotation)
+      // Handle movement (rotation or zoom)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
           let currentX = event.touches[0].clientX;
           let currentY = event.touches[0].clientY;
-          const deltaX = currentX - previousX;
-          const deltaY = currentY - previousY;
+          const deltaX = (currentX - previousX) * smoothFactor;
+          const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Update rotation angles with constraints
-          rotationY += deltaX * 0.01; // Adjust sensitivity if needed
-          rotationX -= deltaY * 0.01;
+          // Rotate on Y-axis (left-right) with 180-degree limit (-90 to +90)
+          rotationY += deltaX;
+          rotationY = Math.max(-maxRotationY, Math.min(maxRotationY, rotationY)); // Clamp to 180 degrees
 
-          // Constrain the rotation angles
-          rotationY = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationY));
-          rotationX = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationX));
+          // Rotate on X-axis (up-down) with 90-degree limit (-45 to +45)
+          rotationX -= deltaY;
+          rotationX = Math.max(-maxRotationX, Math.min(maxRotationX, rotationX)); // Clamp to 90 degrees
 
-          // Apply the rotations without changing position
+          // Apply the rotations
           model.object3D.rotation.y = rotationY;
           model.object3D.rotation.x = rotationX;
 
           previousX = currentX;
           previousY = currentY;
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          const currentDistance = getDistance(event.touches[0], event.touches[1]);
+          const scaleChange = currentDistance / initialDistance;
+
+          model.object3D.scale.set(
+            model.object3D.scale.x * scaleChange,
+            model.object3D.scale.y * scaleChange,
+            model.object3D.scale.z * scaleChange
+          );
+
+          initialDistance = currentDistance; // Update for next move event
         }
       };
 
       // End interaction
       const endInteraction = () => {
         isDragging = false;
+      };
+
+      // Utility to get distance between two touches (for pinch gesture)
+      const getDistance = (touch1, touch2) => {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
       };
 
       // Add event listeners for touch events
