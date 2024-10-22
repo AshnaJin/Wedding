@@ -3,17 +3,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
-        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/OG+Pankaj+%26+Ashna.glb"></a-asset-item>
+        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/Duck.glb"></a-asset-item>
       </a-assets>
 
       <a-camera position="0 0 0"></a-camera>
+      
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model src="#avatarModel" position="0 0 0.1" scale="0.5 0.5 0.5"></a-gltf-model>
+        <a-gltf-model
+          id="model"
+          src="#avatarModel"
+          position="0 0 0.1"
+          scale="0.5 0.5 0.5"
+          animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate"
+          gesture-handler
+        ></a-gltf-model>
       </a-entity>
+
+      <script>
+        AFRAME.registerComponent('gesture-handler', {
+          init: function () {
+            const model = this.el;
+
+            let scale = 0.5; // Initial scale factor
+
+            // Listen for pinch events to zoom in and out
+            this.el.sceneEl.addEventListener('pinch', (event) => {
+              const pinchScale = event.detail.scale;
+              scale *= pinchScale; // Update scale based on pinch scale
+              model.setAttribute('scale', `${scale} ${scale} ${scale}`);
+            });
+
+            // Listen for drag events to move the model
+            this.el.sceneEl.addEventListener('drag', (event) => {
+              const movementX = event.detail.movementX * 0.01;
+              const movementY = event.detail.movementY * 0.01;
+              const position = model.getAttribute('position');
+              model.setAttribute('position', {
+                x: position.x + movementX,
+                y: position.y + movementY,
+                z: position.z
+              });
+            });
+          }
+        });
+      </script>
     </a-scene>
   </body>
 </html>
