@@ -11,12 +11,12 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="2"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="5" position="-1 2 1"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
+      <a-light type="directional" color="#ffffff" intensity="2" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0 0.03" scale="5 5 5"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0 0.03" scale="7 7 7"></a-gltf-model>
       </a-entity>
     </a-scene>
 
@@ -29,10 +29,11 @@
       let previousY = 0;
       let initialDistance = 0;
 
-      let rotationY = 0; // Full left-right rotation (Y-axis)
-      let rotationX = 0; // Limited up-down rotation (X-axis)
+      let rotationY = 0; // Y-axis (left-right) rotation
+      let rotationX = 0; // X-axis (up-down) rotation
       const smoothFactor = 0.05; // Smoothing factor
       const maxRotationX = Math.PI / 4; // Limit for up/down rotation (45 degrees)
+      const maxRotationY = Math.PI / 2; // Limit for left-right rotation (90 degrees, half of 180)
 
       // Start interaction
       const startInteraction = (event) => {
@@ -56,12 +57,13 @@
           const deltaX = (currentX - previousX) * smoothFactor;
           const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Rotate on Y-axis for full rotation (left-right)
+          // Rotate on Y-axis (left-right) with 180-degree limit (-90 to +90)
           rotationY += deltaX;
+          rotationY = Math.max(-maxRotationY, Math.min(maxRotationY, rotationY)); // Clamp to 180 degrees
 
-          // Rotate on X-axis (up-down) with limit
+          // Rotate on X-axis (up-down) with 90-degree limit (-45 to +45)
           rotationX -= deltaY;
-          rotationX = Math.max(-maxRotationX, Math.min(maxRotationX, rotationX)); // Limit to ±45 degrees
+          rotationX = Math.max(-maxRotationX, Math.min(maxRotationX, rotationX)); // Clamp to 90 degrees
 
           // Apply the rotations
           model.object3D.rotation.y = rotationY;
