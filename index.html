@@ -11,7 +11,7 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
       <a-light type="directional" color="#ffffff" intensity="1" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
@@ -23,44 +23,62 @@
     <script>
       const model = document.getElementById('model');
 
-      // Track rotation
+      // Track rotation and zoom
       let isDragging = false;
       let previousX = 0;
+      let initialDistance = 0;
 
       // Start rotation on mouse/touch down
       const startDrag = (event) => {
         // Prevent default touch actions (like scrolling)
-        event.preventDefault(); 
+        event.preventDefault();
 
-        // Get the initial position
-        if (event.touches) {
+        if (event.touches.length === 1) {
+          // Single finger movement
           previousX = event.touches[0].clientX;
-        } else {
-          previousX = event.clientX;
+          isDragging = true;
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          initialDistance = getDistance(event.touches[0], event.touches[1]);
         }
-        isDragging = true;
       };
 
       // Update rotation on mouse/touch move
       const moveModel = (event) => {
-        if (!isDragging) return;
+        if (event.touches.length === 1) {
+          // Single finger rotation
+          if (!isDragging) return;
 
-        // Get the current position
-        let currentX;
-        if (event.touches) {
-          currentX = event.touches[0].clientX;
-        } else {
-          currentX = event.clientX;
+          let currentX = event.touches[0].clientX;
+          const deltaX = currentX - previousX;
+          model.object3D.rotation.y += deltaX * 0.01; // Adjust sensitivity here
+          previousX = currentX; // Update for next move event
+
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          const currentDistance = getDistance(event.touches[0], event.touches[1]);
+          const scaleChange = currentDistance / initialDistance;
+
+          model.object3D.scale.set(
+            model.object3D.scale.x * scaleChange,
+            model.object3D.scale.y * scaleChange,
+            model.object3D.scale.z * scaleChange
+          );
+
+          initialDistance = currentDistance; // Update for next move event
         }
-
-        const deltaX = currentX - previousX;
-        model.object3D.rotation.y += deltaX * 0.01; // Adjust sensitivity here
-        previousX = currentX; // Update for next move event
       };
 
       // Stop dragging on mouse/touch up
       const endDrag = () => {
         isDragging = false;
+      };
+
+      // Calculate the distance between two touch points
+      const getDistance = (touch1, touch2) => {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
       };
 
       // Add event listeners for mouse
