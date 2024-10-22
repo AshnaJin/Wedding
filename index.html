@@ -4,7 +4,6 @@
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-      /* Optional styling for a better visual experience */
       body {
         margin: 0;
         overflow: hidden; /* Prevent scrolling */
@@ -12,6 +11,8 @@
     </style>
   </head>
   <body>
+    <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio> <!-- Replace with your audio file -->
+    
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
         <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/centered.glb"></a-asset-item>
@@ -22,13 +23,14 @@
       <a-light type="directional" color="#ffffff" intensity="2" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0.05 0" scale="7 7 7"></a-gltf-model>
+      <a-entity mindar-image-target="targetIndex: 0" id="modelContainer">
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.05 0" scale="6 6 6"></a-gltf-model>
       </a-entity>
     </a-scene>
 
     <script>
       const model = document.getElementById('model');
+      const backgroundMusic = document.getElementById('backgroundMusic');
 
       // Variables to track gesture states
       let isDragging = false;
@@ -71,7 +73,8 @@
           const deltaY = currentY - previousY;
 
           // Update rotation angles with constraints
-          rotationY += deltaY * 0.01; // Adjust sensitivity if needed
+          const rotationSensitivity = 0.005; // Reduced sensitivity
+          rotationY += deltaY * rotationSensitivity; // Adjusted sensitivity
 
           // Constrain the rotation angle
           rotationY = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationY));
@@ -106,6 +109,12 @@
         const dy = touch1.clientY - touch2.clientY;
         return Math.sqrt(dx * dx + dy * dy);
       };
+
+      // Play background music when the model is detected
+      const modelContainer = document.getElementById('modelContainer');
+      modelContainer.addEventListener('model-loaded', () => {
+        backgroundMusic.play(); // Play music when the model is loaded
+      });
 
       // Add event listeners for touch events
       window.addEventListener('touchstart', startInteraction);
