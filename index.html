@@ -3,6 +3,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      /* Optional styling for a better visual experience */
+      body {
+        margin: 0;
+        overflow: hidden; /* Prevent scrolling */
+      }
+    </style>
   </head>
   <body>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
@@ -32,6 +39,17 @@
       let rotationY = 0; // Y-axis rotation
 
       const MAX_ROTATION = Math.PI / 2; // 90 degrees in radians
+      const DEFAULT_ZOOM = 1; // Default zoom level
+      let zoomLevel = DEFAULT_ZOOM; // Current zoom level
+
+      // Zoom function for the entire webpage
+      const zoomPage = (event) => {
+        event.preventDefault(); // Prevent default scroll behavior
+        const zoomChange = event.deltaY > 0 ? 0.9 : 1.1; // Zoom in/out
+        zoomLevel *= zoomChange; // Update zoom level
+        document.body.style.transform = `scale(${zoomLevel})`; // Apply zoom to body
+        document.body.style.transformOrigin = 'top left'; // Set origin for scaling
+      };
 
       // Start interaction
       const startInteraction = (event) => {
@@ -93,6 +111,7 @@
       window.addEventListener('touchstart', startInteraction);
       window.addEventListener('touchmove', moveModel);
       window.addEventListener('touchend', endInteraction);
+      window.addEventListener('wheel', zoomPage); // Zoom with mouse wheel
     </script>
   </body>
 </html>
