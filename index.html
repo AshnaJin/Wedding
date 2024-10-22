@@ -11,12 +11,12 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="2"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
       <a-light type="directional" color="#ffffff" intensity="2" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0 0.01" scale="5 5 5"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.03 0" scale="5 5 5"></a-gltf-model>
       </a-entity>
     </a-scene>
 
@@ -31,15 +31,12 @@
 
       let rotationY = 0;
       let rotationX = 0;
-      const maxRotationX = Math.PI / 4;  // Limit vertical rotation to 45 degrees
-
-      // Smoothing factor (adjust to make smoother)
-      const smoothFactor = 0.05;
+      let rotationZ = 0;
+      const smoothFactor = 0.05; // Smoothing factor
 
       // Start interaction
       const startInteraction = (event) => {
         if (event.touches.length === 1) {
-          // Single finger drag to rotate
           event.preventDefault();
           previousX = event.touches[0].clientX;
           previousY = event.touches[0].clientY;
@@ -54,22 +51,22 @@
       // Handle movement (rotation or zoom)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
-          // Single finger rotation
           let currentX = event.touches[0].clientX;
           let currentY = event.touches[0].clientY;
           const deltaX = (currentX - previousX) * smoothFactor;
           const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Apply dampened rotation to the Y and X axis
-          rotationY += deltaX;
-          rotationX -= deltaY;
+          // Rotate on X, Y, and Z axes (free rotation)
+          rotationY += deltaX; // Rotate on Y-axis (left-right)
+          rotationX -= deltaY; // Rotate on X-axis (up-down)
 
-          // Clamp rotationX to limit vertical rotation between -45 and 45 degrees
-          rotationX = Math.max(-maxRotationX, Math.min(maxRotationX, rotationX));
+          // Optional: Add rotation on Z-axis for a 3rd axis rotation
+          rotationZ += deltaX * 0.05; // Rotate on Z-axis
 
-          // Update model rotation
+          // Apply the rotations
           model.object3D.rotation.y = rotationY;
           model.object3D.rotation.x = rotationX;
+          model.object3D.rotation.z = rotationZ;
 
           previousX = currentX;
           previousY = currentY;
