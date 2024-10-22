@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MindAR.js GLB Model with Marker</title>
+  <title>MindAR.js GLB Model Example</title>
+  <!-- Importing MindAR.js and A-Frame -->
   <script src="https://cdn.jsdelivr.net/gh/MindAR-js/aframe/dist/aframe/aframe-mindar.js"></script>
   <style>
     body, html {
@@ -20,17 +21,17 @@
 </head>
 <body>
   <div id="ar-container">
-    <a-scene mindar="imageTargetSrc: target.mind; autoStart: true;" vr-mode-ui="enabled: false" embedded>
-      <!-- AR Camera -->
-      <a-entity camera look-controls></a-entity>
+    <a-scene mindar="imageTargetSrc: targets.mind; autoStart: true;" vr-mode-ui="enabled: false" embedded>
+      <!-- Camera setup for AR -->
+      <a-camera position="0 0 0" look-controls></a-camera>
 
-      <!-- Marker Target (with index 0) -->
+      <!-- Marker for AR tracking -->
       <a-entity mindar-image-target="targetIndex: 0">
-        <!-- 3D Model to load -->
+        <!-- 3D Model (GLB) to load -->
         <a-gltf-model 
-          src="https://your-hosting-link.com/your-model.glb" 
-          position="0 0 0" 
-          scale="0.1 0.1 0.1" 
+          src="https://your-hosting-link.com/your-model.glb"
+          scale="0.05 0.05 0.05" 
+          position="0 0 0"
           rotation="0 0 0">
         </a-gltf-model>
       </a-entity>
@@ -38,12 +39,14 @@
   </div>
 
   <script>
-    // Check if the browser supports camera access
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      console.log('Browser supports camera access');
-    } else {
-      alert('Your browser does not support camera access');
-    }
+    // Check if camera is accessible
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function(stream) {
+        console.log("Camera access granted");
+      })
+      .catch(function(err) {
+        console.error("Camera access denied", err);
+      });
   </script>
 </body>
 </html>
