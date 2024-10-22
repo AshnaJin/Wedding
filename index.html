@@ -11,7 +11,7 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="2"></a-light>
       <a-light type="directional" color="#ffffff" intensity="5" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
@@ -29,10 +29,10 @@
       let previousY = 0;
       let initialDistance = 0;
 
-      let rotationY = 0;
-      let rotationX = 0;
-      let rotationZ = 0;
+      let rotationY = 0; // Full left-right rotation (Y-axis)
+      let rotationX = 0; // Limited up-down rotation (X-axis)
       const smoothFactor = 0.05; // Smoothing factor
+      const maxRotationX = Math.PI / 4; // Limit for up/down rotation (45 degrees)
 
       // Start interaction
       const startInteraction = (event) => {
@@ -56,17 +56,16 @@
           const deltaX = (currentX - previousX) * smoothFactor;
           const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Rotate on X, Y, and Z axes (free rotation)
-          rotationY += deltaX; // Rotate on Y-axis (left-right)
-          // rotationX -= deltaY; // Rotate on X-axis (up-down)
+          // Rotate on Y-axis for full rotation (left-right)
+          rotationY += deltaX;
 
-          // Optional: Add rotation on Z-axis for a 3rd axis rotation
-          rotationZ += deltaX * 0.05; // Rotate on Z-axis
+          // Rotate on X-axis (up-down) with limit
+          rotationX -= deltaY;
+          rotationX = Math.max(-maxRotationX, Math.min(maxRotationX, rotationX)); // Limit to ±45 degrees
 
           // Apply the rotations
           model.object3D.rotation.y = rotationY;
-         // model.object3D.rotation.x = rotationX;
-          model.object3D.rotation.z = rotationZ;
+          model.object3D.rotation.x = rotationX;
 
           previousX = currentX;
           previousY = currentY;
