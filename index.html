@@ -11,9 +11,14 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="5"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="3" position="0 10 -10" castShadow="true" shadow-mapWidth="1024" shadow-mapHeight="1024" shadow-camera-far="50" shadow-camera-left="-10" shadow-camera-right="10" shadow-camera-top="10" shadow-camera-bottom="-10"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light> <!-- Lower ambient to keep contrast -->
+      <a-light type="directional" color="#ffffff" intensity="2.5" position="0 10 -10" castShadow="true"></a-light>
 
+      <!-- Add a spotlight to enhance reflections on metallic surfaces -->
+      <a-light type="spot" color="#ffffff" intensity="4" position="5 5 5" angle="45" penumbra="1" castShadow="true"></a-light>
+
+      <!-- Add an environment light for global illumination -->
+      <a-light type="hemisphere" color="#ffffff" groundColor="#bbbbbb" intensity="1.5"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
@@ -30,7 +35,6 @@
       let previousY = 0;
       let initialDistance = 0;
 
-      let rotationY = 0;
       let rotationX = 0;
       let rotationZ = 0;
       const smoothFactor = 0.05; // Smoothing factor
@@ -57,15 +61,11 @@
           const deltaX = (currentX - previousX) * smoothFactor;
           const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Rotate on X, Y, and Z axes (free rotation)
-          rotationY += deltaX; // Rotate on Y-axis (left-right)
+          // Rotate on X and Z axes (disable Y-axis rotation)
           rotationX -= deltaY; // Rotate on X-axis (up-down)
-
-          // Optional: Add rotation on Z-axis for a 3rd axis rotation
           rotationZ += deltaX * 0.05; // Rotate on Z-axis
 
           // Apply the rotations
-          model.object3D.rotation.y = rotationY;
           model.object3D.rotation.x = rotationX;
           model.object3D.rotation.z = rotationZ;
 
