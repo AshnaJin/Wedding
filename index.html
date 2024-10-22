@@ -7,11 +7,11 @@
   <body>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
-        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/OG.glb"></a-asset-item>
+        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/final_glb.glb"></a-asset-item>
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
       <a-light type="directional" color="#ffffff" intensity="1" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
@@ -29,6 +29,10 @@
 
       // Start rotation on mouse/touch down
       const startDrag = (event) => {
+        // Prevent default touch actions (like scrolling)
+        event.preventDefault(); 
+
+        // Get the initial position
         if (event.touches) {
           previousX = event.touches[0].clientX;
         } else {
@@ -41,6 +45,7 @@
       const moveModel = (event) => {
         if (!isDragging) return;
 
+        // Get the current position
         let currentX;
         if (event.touches) {
           currentX = event.touches[0].clientX;
