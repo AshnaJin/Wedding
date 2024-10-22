@@ -16,7 +16,7 @@
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0.1 0" scale="7 7 7"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.05 0" scale="7 7 7"></a-gltf-model>
       </a-entity>
     </a-scene>
 
@@ -26,9 +26,10 @@
       // Variables to track gesture states
       let isDragging = false;
       let previousY = 0;
+      let initialDistance = 0;
 
-      // Current rotation angles
-      let rotationY = 0;  // Y-axis rotation
+      // Current rotation angle
+      let rotationY = 0; // Y-axis rotation
 
       const MAX_ROTATION = Math.PI / 2; // 90 degrees in radians
 
@@ -38,10 +39,14 @@
           event.preventDefault();
           previousY = event.touches[0].clientY;
           isDragging = true;
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          event.preventDefault();
+          initialDistance = getDistance(event.touches[0], event.touches[1]);
         }
       };
 
-      // Handle movement (rotation)
+      // Handle movement (rotation and zoom)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
           let currentY = event.touches[0].clientY;
@@ -57,12 +62,31 @@
           model.object3D.rotation.y = rotationY;
 
           previousY = currentY;
+        } else if (event.touches.length === 2) {
+          // Pinch to zoom
+          const currentDistance = getDistance(event.touches[0], event.touches[1]);
+          const scaleChange = currentDistance / initialDistance;
+
+          model.object3D.scale.set(
+            model.object3D.scale.x * scaleChange,
+            model.object3D.scale.y * scaleChange,
+            model.object3D.scale.z * scaleChange
+          );
+
+          initialDistance = currentDistance; // Update for the next move event
         }
       };
 
       // End interaction
       const endInteraction = () => {
         isDragging = false;
+      };
+
+      // Utility to get the distance between two touches (for pinch gesture)
+      const getDistance = (touch1, touch2) => {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
       };
 
       // Add event listeners for touch events
