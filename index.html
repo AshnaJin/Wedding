@@ -11,58 +11,62 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="0.5"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.0"></a-light>
       <a-light type="directional" color="#ffffff" intensity="1" position="-1 2 1"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0.03 0" scale="5 5 5"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.01 0" scale="5 5 5"></a-gltf-model>
       </a-entity>
     </a-scene>
 
     <script>
       const model = document.getElementById('model');
 
-      // Rotate the model with one finger
+      // Track rotation
       let isDragging = false;
-      let startX;
+      let previousX = 0;
 
-      window.addEventListener('mousedown', (event) => {
-        startX = event.clientX;
+      // Start rotation on mouse/touch down
+      const startDrag = (event) => {
+        if (event.touches) {
+          previousX = event.touches[0].clientX;
+        } else {
+          previousX = event.clientX;
+        }
         isDragging = true;
-      });
+      };
 
-      window.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-          const deltaX = event.clientX - startX;
-          model.object3D.rotation.y += deltaX * 0.01; // Rotate left/right
-          startX = event.clientX; // Update startX
+      // Update rotation on mouse/touch move
+      const moveModel = (event) => {
+        if (!isDragging) return;
+
+        let currentX;
+        if (event.touches) {
+          currentX = event.touches[0].clientX;
+        } else {
+          currentX = event.clientX;
         }
-      });
 
-      window.addEventListener('mouseup', () => {
+        const deltaX = currentX - previousX;
+        model.object3D.rotation.y += deltaX * 0.005; // Adjust sensitivity here
+        previousX = currentX; // Update for next move event
+      };
+
+      // Stop dragging on mouse/touch up
+      const endDrag = () => {
         isDragging = false;
-      });
+      };
 
-      // Touch support for mobile
-      window.addEventListener('touchstart', (event) => {
-        if (event.touches.length === 1) { // Ensure one finger is touching
-          startX = event.touches[0].clientX;
-          isDragging = true;
-        }
-      });
+      // Add event listeners for mouse
+      window.addEventListener('mousedown', startDrag);
+      window.addEventListener('mousemove', moveModel);
+      window.addEventListener('mouseup', endDrag);
 
-      window.addEventListener('touchmove', (event) => {
-        if (isDragging && event.touches.length === 1) {
-          const deltaX = event.touches[0].clientX - startX;
-          model.object3D.rotation.y += deltaX * 0.01; // Rotate left/right
-          startX = event.touches[0].clientX; // Update startX
-        }
-      });
-
-      window.addEventListener('touchend', () => {
-        isDragging = false;
-      });
+      // Add event listeners for touch
+      window.addEventListener('touchstart', startDrag);
+      window.addEventListener('touchmove', moveModel);
+      window.addEventListener('touchend', endDrag);
     </script>
   </body>
 </html>
