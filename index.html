@@ -51,6 +51,8 @@
 
           let currentX = event.touches[0].clientX;
           const deltaX = currentX - previousX;
+
+          // Rotate only around the Y-axis
           model.object3D.rotation.y += deltaX * 0.01; // Adjust sensitivity here
           previousX = currentX; // Update for next move event
 
