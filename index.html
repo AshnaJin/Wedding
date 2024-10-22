@@ -11,18 +11,14 @@
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light> <!-- Lower ambient to keep contrast -->
+      <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
       <a-light type="directional" color="#ffffff" intensity="2.5" position="0 10 -10" castShadow="true"></a-light>
-
-      <!-- Add a spotlight to enhance reflections on metallic surfaces -->
       <a-light type="spot" color="#ffffff" intensity="4" position="5 5 5" angle="45" penumbra="1" castShadow="true"></a-light>
-
-      <!-- Add an environment light for global illumination -->
       <a-light type="hemisphere" color="#ffffff" groundColor="#bbbbbb" intensity="1.5"></a-light>
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0 0" scale="5 5 5"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.03 0" scale="5 5 5"></a-gltf-model>
       </a-entity>
     </a-scene>
 
@@ -32,70 +28,37 @@
       // Variables to track gesture states and smoothness
       let isDragging = false;
       let previousX = 0;
-      let previousY = 0;
-      let initialDistance = 0;
-
-      let rotationX = 0;
       let rotationZ = 0;
-      const smoothFactor = 0.05; // Smoothing factor
+      const smoothFactor = 0.05; // Smoothing factor for smooth rotation
 
       // Start interaction
       const startInteraction = (event) => {
         if (event.touches.length === 1) {
           event.preventDefault();
           previousX = event.touches[0].clientX;
-          previousY = event.touches[0].clientY;
           isDragging = true;
-        } else if (event.touches.length === 2) {
-          // Pinch to zoom
-          event.preventDefault();
-          initialDistance = getDistance(event.touches[0], event.touches[1]);
         }
       };
 
-      // Handle movement (rotation or zoom)
+      // Handle movement (rotation on Z-axis only)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
           let currentX = event.touches[0].clientX;
-          let currentY = event.touches[0].clientY;
           const deltaX = (currentX - previousX) * smoothFactor;
-          const deltaY = (currentY - previousY) * smoothFactor;
 
-          // Rotate on X and Z axes (disable Y-axis rotation)
-          rotationX -= deltaY; // Rotate on X-axis (up-down)
-          rotationZ += deltaX * 0.05; // Rotate on Z-axis
+          // Rotate only on Z-axis
+          rotationZ += deltaX * 0.05; // Modify the factor for sensitivity
 
-          // Apply the rotations
-          model.object3D.rotation.x = rotationX;
+          // Apply the Z-axis rotation
           model.object3D.rotation.z = rotationZ;
 
           previousX = currentX;
-          previousY = currentY;
-        } else if (event.touches.length === 2) {
-          // Pinch to zoom
-          const currentDistance = getDistance(event.touches[0], event.touches[1]);
-          const scaleChange = currentDistance / initialDistance;
-
-          model.object3D.scale.set(
-            model.object3D.scale.x * scaleChange,
-            model.object3D.scale.y * scaleChange,
-            model.object3D.scale.z * scaleChange
-          );
-
-          initialDistance = currentDistance; // Update for next move event
         }
       };
 
       // End interaction
       const endInteraction = () => {
         isDragging = false;
-      };
-
-      // Utility to get distance between two touches (for pinch gesture)
-      const getDistance = (touch1, touch2) => {
-        const dx = touch1.clientX - touch2.clientX;
-        const dy = touch1.clientY - touch2.clientY;
-        return Math.sqrt(dx * dx + dy * dy);
       };
 
       // Add event listeners for touch events
