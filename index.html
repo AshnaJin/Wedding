@@ -24,6 +24,7 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0" id="modelContainer">
+        <a-plane position="0 0 0" height="0.552" width="1" rotation="0 0 0" color="#800080"></a-plane>
         <a-gltf-model id="model" src="#avatarModel" rotation="0 0 0 " position="0 0 0.1" scale="5 5 5" animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
       
       </a-entity>
@@ -33,59 +34,66 @@
       const model = document.getElementById('model');
       const backgroundMusic = document.getElementById('backgroundMusic');
 
-      // Rotation settings
+      // Variables to track gesture states
       let isDragging = false;
+      let previousX = 0;
       let previousY = 0;
-      const MAX_ROTATION_Y = Math.PI / 4; // +/- 45 degrees in radians
-      let rotationY = 0;
+      let initialDistance = 0;
 
-      // Zoom settings
-      const DEFAULT_SCALE = 1;
-      let currentScale = DEFAULT_SCALE;
+      // Current rotation angles
+      let rotationY = 0;  // Y-axis rotation
+      let rotationX = 0;  // X-axis rotation
 
-      // Zoom for the entire page on desktop
-      const zoomPage = (event) => {
-        event.preventDefault();
-        const zoomChange = event.deltaY > 0 ? 0.95 : 1.05;
-        currentScale *= zoomChange;
-        model.object3D.scale.set(currentScale, currentScale, currentScale);
-      };
+      const MAX_ROTATION = Math.PI / 2; // 90 degrees in radians
 
       // Start interaction
       const startInteraction = (event) => {
         if (event.touches.length === 1) {
           event.preventDefault();
+          previousX = event.touches[0].clientX;
           previousY = event.touches[0].clientY;
           isDragging = true;
         } else if (event.touches.length === 2) {
-          // Reset zoom distance
+          // Pinch to zoom
+          event.preventDefault();
           initialDistance = getDistance(event.touches[0], event.touches[1]);
         }
       };
 
-      // Handle rotation and zoom
+      // Handle movement (rotation)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
+          let currentX = event.touches[0].clientX;
           let currentY = event.touches[0].clientY;
-          const deltaY = (currentY - previousY) * 0.01; // Reduced sensitivity
-          
-          rotationY += deltaY;
-          rotationY = Math.max(-MAX_ROTATION_Y, Math.min(MAX_ROTATION_Y, rotationY));
-          
-          model.object3D.rotation.y = rotationY;
+          const deltaX = currentX - previousX;
+          const deltaY = currentY - previousY;
 
+          // Update rotation angles with constraints
+          rotationY += deltaX * 0.01; // Adjust sensitivity if needed
+          rotationX -= deltaY * 0.01;
+
+          // Constrain the rotation angles
+          rotationY = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationY));
+          rotationX = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationX));
+
+          // Apply the rotations
+          model.object3D.rotation.y = rotationY;
+          model.object3D.rotation.x = rotationX;
+
+          previousX = currentX;
           previousY = currentY;
         } else if (event.touches.length === 2) {
-          // Pinch to zoom
+          // Pinch to zoom (if needed)
           const currentDistance = getDistance(event.touches[0], event.touches[1]);
           const scaleChange = currentDistance / initialDistance;
 
           model.object3D.scale.set(
-            currentScale * scaleChange,
-            currentScale * scaleChange,
-            currentScale * scaleChange
+            model.object3D.scale.x * scaleChange,
+            model.object3D.scale.y * scaleChange,
+            model.object3D.scale.z * scaleChange
           );
-          initialDistance = currentDistance;
+
+          initialDistance = currentDistance; // Update for next move event
         }
       };
 
@@ -100,15 +108,7 @@
         const dy = touch1.clientY - touch2.clientY;
         return Math.sqrt(dx * dx + dy * dy);
       };
-     const enableAudio = () => {
-        backgroundMusic.play().catch(error => {
-          console.log("Playback prevented until user interaction:", error);
-        });
-        document.removeEventListener('click', enableAudio); // Remove listener after enabling audio
-      };
 
-      // Add event listener for user interaction to enable audio
-    document.addEventListener('click', enableAudio);
       // Play background music when the model is detected
       const modelContainer = document.getElementById('modelContainer');
       modelContainer.addEventListener('model-loaded', () => {
