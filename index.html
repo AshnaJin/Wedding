@@ -11,11 +11,11 @@
     </style>
   </head>
   <body>
-    <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio> <!-- Replace with your audio file -->
+    <audio id="backgroundMusic" src="your-audio-file.mp3" preload="auto"></audio> <!-- Replace with your audio file -->
     
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
-        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/centered.glb"></a-asset-item>
+        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/OG.glb"></a-asset-item>
       </a-assets>
 
       <!-- Ambient and Directional Lights -->
@@ -24,36 +24,32 @@
 
       <a-camera position="0 0 0"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0" id="modelContainer">
-        <a-gltf-model id="model" src="#avatarModel" position="0 0.05 0" scale="6 6 6"></a-gltf-model>
+        <a-gltf-model id="model" src="#avatarModel" position="0 0.03 0" scale="5 5 5"></a-gltf-model>
       </a-entity>
     </a-scene>
 
     <script>
       const model = document.getElementById('model');
+      const modelContainer = document.getElementById('modelContainer');
       const backgroundMusic = document.getElementById('backgroundMusic');
 
-      // Variables to track gesture states
+      // Play music and disable interactions when the model is detected
+      modelContainer.addEventListener('model-loaded', () => {
+        backgroundMusic.play(); // Play background music when the model is detected
+
+        // Disable all interactions by removing event listeners
+        window.removeEventListener('touchstart', startInteraction);
+        window.removeEventListener('touchmove', moveModel);
+        window.removeEventListener('touchend', endInteraction);
+        window.removeEventListener('wheel', zoomPage);
+      });
+
+      // Variables to track interaction states
       let isDragging = false;
       let previousY = 0;
       let initialDistance = 0;
 
-      // Current rotation angle
-      let rotationY = 0; // Y-axis rotation
-
-      const MAX_ROTATION = Math.PI / 2; // 90 degrees in radians
-      const DEFAULT_ZOOM = 1; // Default zoom level
-      let zoomLevel = DEFAULT_ZOOM; // Current zoom level
-
-      // Zoom function for the entire webpage
-      const zoomPage = (event) => {
-        event.preventDefault(); // Prevent default scroll behavior
-        const zoomChange = event.deltaY > 0 ? 0.9 : 1.1; // Zoom in/out
-        zoomLevel *= zoomChange; // Update zoom level
-        document.body.style.transform = `scale(${zoomLevel})`; // Apply zoom to body
-        document.body.style.transformOrigin = 'top left'; // Set origin for scaling
-      };
-
-      // Start interaction
+      // Start interaction (for touch events)
       const startInteraction = (event) => {
         if (event.touches.length === 1) {
           event.preventDefault();
@@ -66,25 +62,18 @@
         }
       };
 
-      // Handle movement (rotation and zoom)
+      // Movement function (to handle rotation and zoom)
       const moveModel = (event) => {
         if (event.touches.length === 1 && isDragging) {
           let currentY = event.touches[0].clientY;
           const deltaY = currentY - previousY;
 
-          // Update rotation angles with constraints
-          const rotationSensitivity = 0.005; // Reduced sensitivity
-          rotationY += deltaY * rotationSensitivity; // Adjusted sensitivity
-
-          // Constrain the rotation angle
-          rotationY = Math.max(-MAX_ROTATION, Math.min(MAX_ROTATION, rotationY));
-
-          // Apply the rotation without changing position
-          model.object3D.rotation.y = rotationY;
+          // Adjust the model's rotation angle
+          model.object3D.rotation.y = deltaY * 0.005; // Adjust sensitivity if needed
 
           previousY = currentY;
         } else if (event.touches.length === 2) {
-          // Pinch to zoom
+          // Handle pinch to zoom
           const currentDistance = getDistance(event.touches[0], event.touches[1]);
           const scaleChange = currentDistance / initialDistance;
 
@@ -94,33 +83,32 @@
             model.object3D.scale.z * scaleChange
           );
 
-          initialDistance = currentDistance; // Update for the next move event
+          initialDistance = currentDistance; // Update distance for next movement
         }
       };
 
-      // End interaction
+      // End of interaction
       const endInteraction = () => {
         isDragging = false;
       };
 
-      // Utility to get the distance between two touches (for pinch gesture)
+      // Utility to calculate distance between two touches (for pinch gesture)
       const getDistance = (touch1, touch2) => {
         const dx = touch1.clientX - touch2.clientX;
         const dy = touch1.clientY - touch2.clientY;
         return Math.sqrt(dx * dx + dy * dy);
       };
 
-      // Play background music when the model is detected
-      const modelContainer = document.getElementById('modelContainer');
-      modelContainer.addEventListener('model-loaded', () => {
-        backgroundMusic.play(); // Play music when the model is loaded
-      });
+      // Disable page zooming after detection
+      const zoomPage = (event) => {
+        event.preventDefault();
+      };
 
-      // Add event listeners for touch events
+      // Event listeners for touch events before model is detected
       window.addEventListener('touchstart', startInteraction);
       window.addEventListener('touchmove', moveModel);
       window.addEventListener('touchend', endInteraction);
-      window.addEventListener('wheel', zoomPage); // Zoom with mouse wheel
+      window.addEventListener('wheel', zoomPage);
     </script>
   </body>
 </html>
