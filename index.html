@@ -33,6 +33,16 @@
         margin-right: 10px;
         border-radius: 50%;
       }
+
+      /* Speaker Icon Style */
+      .speaker-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -41,7 +51,10 @@
       Puri huyi #PanNa ki tamanna
     </div>
     
-    <!-- Your existing AR and A-Frame content here -->
+    <!-- Speaker icon for music control -->
+    <img src="speaker-on.png" id="speakerIcon" class="speaker-icon" alt="Speaker Icon" /> <!-- Replace with your speaker icons -->
+
+    <!-- AR and A-Frame content -->
     <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
@@ -142,19 +155,46 @@
 
       // Play background music when the model is detected
       const modelContainer = document.getElementById('modelContainer');
+      const speakerIcon = document.getElementById('speakerIcon');
 
-      // Enable audio playback after user interaction
+      // Load icons for speaker on/off
+      const speakerOnIcon = "speaker-on.png"; // Icon for sound on
+      const speakerOffIcon = "speaker-off.png"; // Icon for sound off
+
+      // Initialize audio state
+      let isPlaying = false;
+
+      // Enable audio on first click
       const enableAudio = () => {
         backgroundMusic.play().catch(error => {
           console.log("Playback blocked until user interaction:", error);
         });
-        document.removeEventListener('click', enableAudio); // Remove listener after enabling audio
+        document.removeEventListener('click', enableAudio); 
       };
-      document.addEventListener('click', enableAudio); // Add listener for user interaction
+      document.addEventListener('click', enableAudio);
 
-      // Play music when the model is detected
+      // Toggle music play/pause on icon click
+      const toggleMusic = () => {
+        if (isPlaying) {
+          backgroundMusic.pause();
+          speakerIcon.src = speakerOffIcon;
+        } else {
+          backgroundMusic.play();
+          speakerIcon.src = speakerOnIcon;
+        }
+        isPlaying = !isPlaying;
+      };
+
+      // Set initial icon and attach event listener
+      speakerIcon.addEventListener("click", toggleMusic);
+
+      // Play background music when the model is detected
       modelContainer.addEventListener('model-loaded', () => {
+        if (!isPlaying) {
         backgroundMusic.play();
+        speakerIcon.src = speakerOnIcon;
+          isPlaying = true;
+        }
       });
 
       // Event listeners for touch and zoom
