@@ -25,17 +25,23 @@
         const modelContainer = document.getElementById('modelContainer');
         const mindarScene = document.querySelector('a-scene');
 
+        // Track if the model has been placed
+        let modelPlaced = false;
+
         // Listen for marker detection
         mindarScene.addEventListener('targetFound', () => {
-          // Load and place model
-          const modelEntity = document.createElement('a-gltf-model');
-          modelEntity.setAttribute('src', '#model');
-          modelEntity.setAttribute('scale', '1 1 1');  // Adjust scale as needed
-          modelEntity.setAttribute('position', '0 0 0');
-          modelContainer.appendChild(modelEntity);
+          if (!modelPlaced) {
+            // Load and place model on first detection
+            const modelEntity = document.createElement('a-gltf-model');
+            modelEntity.setAttribute('src', '#model');
+            modelEntity.setAttribute('scale', '1 1 1');  // Adjust scale as needed
+            modelEntity.setAttribute('position', '0 0 0');
+            modelContainer.appendChild(modelEntity);
 
-          // Disable tracking
-          mindarScene.components['mindar-image'].stop();
+            // Mark as placed and stop tracking
+            modelPlaced = true;
+            mindarScene.components['mindar-image'].stop();
+          }
         });
       });
     </script>
