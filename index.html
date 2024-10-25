@@ -18,10 +18,6 @@
         <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/centered.glb"></a-asset-item>
       </a-assets>
 
-      <!-- Ambient and Directional Lights -->
-      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
-      <a-light type="directional" color="#ffffff" intensity="2" position="-1 2 1"></a-light>
-
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
       <a-entity mindar-image-target="targetIndex: 0" id="modelContainer">
         <a-gltf-model id="model" src="#avatarModel" rotation="0 0 0 " position="0 0 0.1" scale="5 5 5" animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
