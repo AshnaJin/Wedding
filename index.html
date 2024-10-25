@@ -154,9 +154,26 @@
 
       // Play music when the model is detected
       modelContainer.addEventListener('model-loaded', () => {
-        backgroundMusic.play();
+        // Check if the music is already playing; if not, try to play it
+        if (backgroundMusic.paused) {
+          backgroundMusic.play().catch(error => {
+            console.log("Playback failed after model loaded:", error);
+          });
+        }
       });
 
+      // Function to handle visibility changes
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          // Pause the music when the tab is in the background
+          backgroundMusic.pause();
+        } else {
+          // Resume the music when the tab becomes active again
+          backgroundMusic.play().catch(error => {
+            console.error("Playback failed:", error);
+          });
+        }
+      });
       // Event listeners for touch and zoom
       window.addEventListener('touchstart', startInteraction);
       window.addEventListener('touchmove', moveModel);
