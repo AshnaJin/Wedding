@@ -52,13 +52,13 @@
     </div>
     
     <!-- Speaker icon for music control -->
-    <img src="speaker-on.jpg" id="speakerIcon" class="speaker-icon" alt="Speaker Icon" /> <!-- Replace with your speaker icons -->
+    <img src="speaker-off.jpg" id="speakerIcon" class="speaker-icon" alt="Speaker Icon" /> <!-- Replace with your speaker icons -->
 
     <!-- AR and A-Frame content -->
     <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
-        <a-asset-item id="avatarModel" src="ashna_pankaj.glb"></a-asset-item>
+        <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/relight.glb"></a-asset-item>
       </a-assets>
 
       <!-- Lights -->
@@ -164,39 +164,34 @@
       // Initialize audio state
       let isPlaying = false;
 
-      // Enable audio on first click
-      const enableAudio = () => {
-        backgroundMusic.play().catch(error => {
-          console.log("Playback blocked until user interaction:", error);
-        });
-        document.removeEventListener('click', enableAudio); 
-      };
-      document.addEventListener('click', enableAudio);
-
       // Toggle music play/pause on icon click
       const toggleMusic = () => {
         if (isPlaying) {
           backgroundMusic.pause();
           speakerIcon.src = speakerOffIcon;
+          isPlaying = false;
         } else {
-          backgroundMusic.play();
+          backgroundMusic.play().catch(error => {
+            console.error("Playback failed:", error);
+          });
           speakerIcon.src = speakerOnIcon;
+          isPlaying = true;
         }
-        isPlaying = !isPlaying;
       };
 
       // Set initial icon and attach event listener
       speakerIcon.addEventListener("click", toggleMusic);
 
-      // Play background music when the model is detected
-      modelContainer.addEventListener('model-loaded', () => {
-        if (!isPlaying) {
-        backgroundMusic.play();
+      // Ensure the audio only plays after user interaction on some browsers
+      backgroundMusic.addEventListener("play", () => {
+        isPlaying = true;
         speakerIcon.src = speakerOnIcon;
-          isPlaying = true;
-        }
       });
 
+      backgroundMusic.addEventListener("pause", () => {
+        isPlaying = false;
+        speakerIcon.src = speakerOffIcon;
+      });
       // Event listeners for touch and zoom
       window.addEventListener('touchstart', startInteraction);
       window.addEventListener('touchmove', moveModel);
