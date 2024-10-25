@@ -7,41 +7,31 @@
   <body>
     <a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
+        <!-- Link to your 3D model on S3 -->
         <a-asset-item id="model" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/final_glb.glb"></a-asset-item>
       </a-assets>
 
-      <!-- Lights for better visibility -->
+      <!-- Lights for better visibility of model -->
       <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
       <a-light type="directional" color="#ffffff" intensity="2" position="1 1 0"></a-light>
 
+      <!-- Camera and target marker container -->
       <a-camera position="0 0 0"></a-camera>
-      
-      <!-- Placeholder entity for 3D model -->
-      <a-entity id="modelContainer" position="0 0 0"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 0" id="target">
+        <a-gltf-model id="modelEntity" src="#model" position="0 0 0" scale="1 1 1" visible="false"></a-gltf-model>
+      </a-entity>
     </a-scene>
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const modelContainer = document.getElementById('modelContainer');
+        const modelEntity = document.getElementById('modelEntity');
         const mindarScene = document.querySelector('a-scene');
 
-        // Track if the model has been placed
-        let modelPlaced = false;
-
-        // Listen for marker detection
+        // Detect marker and make model visible
         mindarScene.addEventListener('targetFound', () => {
-          if (!modelPlaced) {
-            // Load and place model on first detection
-            const modelEntity = document.createElement('a-gltf-model');
-            modelEntity.setAttribute('src', '#model');
-            modelEntity.setAttribute('scale', '1 1 1');  // Adjust scale as needed
-            modelEntity.setAttribute('position', '0 0 0');
-            modelContainer.appendChild(modelEntity);
-
-            // Mark as placed and stop tracking
-            modelPlaced = true;
-            mindarScene.components['mindar-image'].stop();
-          }
+          modelEntity.setAttribute('visible', 'true');
+          // Stop tracking after placing model
+          mindarScene.components['mindar-image'].stop();
         });
       });
     </script>
