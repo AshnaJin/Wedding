@@ -8,11 +8,39 @@
         margin: 0;
         overflow: hidden; /* Prevent scrolling */
       }
+      
+      /* Banner Style */
+      .banner {
+        position: absolute;
+        top: 20px; /* Positioning the banner at the top */
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 218, 185, 0.8); /* Light peach with translucency */
+        color: #000; /* Darker text for contrast */
+        padding: 15px 20px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+      }
+
+      /* Image Style in Banner */
+      .banner img {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
-    <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio> <!-- Replace with your audio file -->
+    <div class="banner">
+      <img src="photo.png" alt="Photo" />
+      Puri huyi #PanNa ki tamanna
+    </div>
     
+    <!-- Your existing AR and A-Frame content here -->
+    <audio id="backgroundMusic" src="bgd_music.mp3" preload="auto"></audio>
     <a-scene mindar-image="imageTargetSrc: targets.mind;" color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true">
       <a-assets>
         <a-asset-item id="avatarModel" src="https://wedding3dmodel.s3.eu-north-1.amazonaws.com/relight.glb"></a-asset-item>
